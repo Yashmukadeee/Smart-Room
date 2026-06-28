@@ -12,24 +12,24 @@ export async function POST(request: Request) {
       }
     }
 
-    const { id, status, color, value } = await request.json();
+    const body = await request.json();
 
-    if (!id) {
-      return NextResponse.json({ error: 'Missing device ID parameter' }, { status: 400 });
-    }
-
-    // Build the dynamic update payload
+    // Allowed columns to update in the unified 'my_room' row
+    const allowedKeys = ['light', 'fan', 'rgb', 'neon', 'decor', 'neon_color', 'ac_cmd', 'temperature', 'humidity'];
     const updateData: Record<string, any> = {
       updated_at: new Date().toISOString()
     };
-    if (status !== undefined) updateData.status = status;
-    if (color !== undefined) updateData.color = color;
-    if (value !== undefined) updateData.value = value;
+
+    for (const key of allowedKeys) {
+      if (body[key] !== undefined) {
+        updateData[key] = body[key];
+      }
+    }
 
     const { data, error } = await supabaseAdmin
       .from('devices')
       .update(updateData)
-      .eq('id', id)
+      .eq('id', 'my_room')
       .select();
 
     if (error) {
