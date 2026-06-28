@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Thermometer, Droplets } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-export function ClimateWidget() {
+export function ClimateWidget({ compact = false }: { compact?: boolean }) {
   const [temperature, setTemperature] = useState<number | null>(null);
   const [humidity, setHumidity] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -60,6 +60,38 @@ export function ClimateWidget() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex items-center gap-4.5 px-4.5 py-2.5 rounded-full bg-slate-950/80 border border-cyan-500/35 text-slate-200 text-xs font-mono font-bold shadow-[0_0_15px_rgba(6,182,212,0.15)] select-none shrink-0"
+      >
+        <div className="flex items-center gap-1.5">
+          <Thermometer className="w-3.5 h-3.5 text-orange-400" />
+          {loading ? (
+            <span className="w-8 h-4 bg-slate-800 animate-pulse rounded" />
+          ) : (
+            <span className="text-slate-100 tabular-nums">
+              {temperature !== null ? `${temperature.toFixed(1)}°C` : '--'}
+            </span>
+          )}
+        </div>
+        <span className="text-slate-800 font-bold select-none">|</span>
+        <div className="flex items-center gap-1.5">
+          <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+          {loading ? (
+            <span className="w-6 h-4 bg-slate-800 animate-pulse rounded" />
+          ) : (
+            <span className="text-slate-100 tabular-nums">
+              {humidity !== null ? `${humidity.toFixed(0)}%` : '--'}
+            </span>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
