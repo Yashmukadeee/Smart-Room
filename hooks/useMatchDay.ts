@@ -52,7 +52,7 @@ export function useMatchDay(): MatchDayData {
 
   const fetchMatches = useCallback(async () => {
     try {
-      const res = await fetch('/api/cricket');
+      const res = await fetch('/api/scores');
       if (!res.ok) {
         setAllMatches([]);
         setMiMatch(null);

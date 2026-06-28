@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-// Server-side proxy for CricAPI — returns ALL live matches + highlights MI
+// Server-side proxy for CricAPI — returns live matches and prioritizes Mumbai Indians (MI)
 // Keeps the API key server-only (CRICAPI_KEY)
 
 export interface LiveMatch {
@@ -23,7 +23,7 @@ const DEMO_MATCHES: LiveMatch[] = [
     id: 'demo-1',
     name: 'Mumbai Indians vs Chennai Super Kings',
     matchType: 'T20',
-    status: 'Mumbai Indians need 2 runs in 8 balls',
+    status: 'Mumbai Indians need 2 runs in 8 balls to win',
     venue: 'Wankhede Stadium, Mumbai',
     teams: ['Mumbai Indians', 'Chennai Super Kings'],
     score: [
@@ -62,7 +62,6 @@ const DEMO_MATCHES: LiveMatch[] = [
     dateTimeGMT: new Date().toISOString(),
   },
 ];
-
 
 function isIplOrIndiaMatch(match: any): boolean {
   const name = (match.name || '').toLowerCase();
@@ -107,7 +106,6 @@ export async function GET() {
     const apiKey = process.env.CRICAPI_KEY;
 
     if (!apiKey || apiKey.startsWith('YOUR_')) {
-      // Demo mode — always return demo matches for development
       const filteredDemo = DEMO_MATCHES.filter(isIplOrIndiaMatch);
       return NextResponse.json({
         demo: true,
@@ -116,7 +114,6 @@ export async function GET() {
       });
     }
 
-    // Real API call — server only
     const res = await fetch(`https://api.cricapi.com/v1/currentMatches?apikey=${apiKey}&offset=0`, {
       next: { revalidate: 60 },
     });

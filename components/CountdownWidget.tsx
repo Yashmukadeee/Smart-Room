@@ -14,10 +14,10 @@ export interface Deadline {
 
 // Pre-seeded deadlines based on June 28, 2026
 export const INITIAL_DEADLINES: Deadline[] = [
-  { id: '1', label: 'OOP 40-Mark Mid-Sem', date: '2026-06-30', category: 'exam' }, // 2 days left (Urgent)
-  { id: '2', label: 'Goa Code Premier League', date: '2026-07-04', category: 'hackathon' }, // 6 days left (Orange)
-  { id: '3', label: 'DBMS Project Submission', date: '2026-07-12', category: 'project' }, // 14 days left (Amber)
-  { id: '4', label: 'Web Dev Assignment', date: '2026-07-28', category: 'assignment' }, // 30 days left (Green)
+  { id: '1', label: 'OOP 40-Mark Assignment', date: '2026-06-30', category: 'assignment' }, // 2 days left (Flashing Red)
+  { id: '2', label: 'Goa Hackathon Submission', date: '2026-07-04', category: 'hackathon' }, // 6 days left (Orange)
+  { id: '3', label: 'DBMS Project Submission', date: '2026-07-10', category: 'project' }, // 12 days left (Green)
+  { id: '4', label: 'Web Dev Exam Study', date: '2026-07-28', category: 'exam' }, // 30 days left (Green)
 ];
 
 interface CountdownWidgetProps {
@@ -68,9 +68,9 @@ export function CountdownWidget({
     .filter(d => d.diffDays >= 0)
     .sort((a, b) => a.diffDays - b.diffDays);
 
-  // Determine if there's an urgent deadline (< 3 days)
+  // Determine if there's an urgent deadline (< 48 hours / <= 2 days)
   useEffect(() => {
-    const nearestUrgent = activeDeadlines.find(d => d.diffDays >= 0 && d.diffDays <= 3);
+    const nearestUrgent = activeDeadlines.find(d => d.diffDays >= 0 && d.diffDays <= 2);
     if (nearestUrgent) {
       onUrgentStatusChange?.(true, nearestUrgent.label);
     } else {
@@ -90,9 +90,9 @@ export function CountdownWidget({
     saveAndSetDeadlines(updated);
   };
 
-  // Color picker based on urgency
+  // Color picker based on urgency (Green > 7 days, Orange 3-7 days, Flashing Red <= 2 days/48 hours)
   const getUrgencyStyles = (days: number) => {
-    if (days <= 3) {
+    if (days <= 2) {
       return {
         color: 'text-red-500',
         bg: 'bg-red-500/10 hover:bg-red-500/15',
@@ -101,7 +101,7 @@ export function CountdownWidget({
         pulse: true,
       };
     }
-    if (days <= 7) {
+    if (days >= 3 && days <= 7) {
       return {
         color: 'text-orange-500',
         bg: 'bg-orange-500/10 hover:bg-orange-500/15',
@@ -110,20 +110,11 @@ export function CountdownWidget({
         pulse: false,
       };
     }
-    if (days <= 14) {
-      return {
-        color: 'text-amber-500',
-        bg: 'bg-amber-500/10 hover:bg-amber-500/15',
-        border: 'border-amber-500/30',
-        dot: 'bg-amber-500 shadow-[0_0_6px_#f59e0b]',
-        pulse: false,
-      };
-    }
     return {
       color: 'text-emerald-500',
       bg: 'bg-emerald-500/10 hover:bg-emerald-500/15',
       border: 'border-emerald-500/30',
-      dot: 'bg-emerald-500 shadow-[0_0_4px_#10b981]',
+      dot: 'bg-emerald-500 shadow-[0_0_6px_#10b981]',
       pulse: false,
     };
   };

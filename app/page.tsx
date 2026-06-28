@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { EchoPopAvatar } from '@/components/EchoPopAvatar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sliders, Volume2, Newspaper, ListTodo, Trophy } from 'lucide-react';
+import { Sliders, Volume2, Newspaper, ListTodo, Trophy, Mic } from 'lucide-react';
 import { useLifeSimulation } from '@/hooks/useLifeSimulation';
 import { useLipSync } from '@/hooks/useLipSync';
 import { supabase } from '@/lib/supabase';
@@ -21,6 +21,8 @@ import { useMatchDay } from '@/hooks/useMatchDay';
 import { useDailyBugle } from '@/hooks/useDailyBugle';
 import { useTodoSync } from '@/hooks/useTodoSync';
 import { TodoList } from '@/components/TodoList';
+import { ClimateWidget } from '@/components/ClimateWidget';
+import { TeamStatusBoard } from '@/components/TeamStatusBoard';
 
 const MOOD_GLOWS: Record<string, string> = {
   // Core moods
@@ -121,6 +123,7 @@ export default function HomePage() {
     mid,
     treble,
     analyser,
+    isSpeaking,
     isAudioLocked,
     startAudioListener,
     stopAudioListener
@@ -320,9 +323,6 @@ export default function HomePage() {
       className="h-dvh w-screen bg-[#04070d] text-slate-100 p-4 md:p-6 lg:p-8 font-sans flex flex-col items-center justify-between overflow-hidden relative"
     >
 
-      {/* Interactive Clock — renders left (HH) + right (MM) panels absolutely beside Spidey */}
-      <InteractiveClock />
-
       {/* Audio Visualizer Halo Background */}
       <AudioVisualizer analyser={isAudioLocked ? null : analyser} />
 
@@ -374,8 +374,25 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Top-right controls: Daily Bugle */}
-      <div className="absolute top-6 right-6 z-20">
+      {/* Top-right controls: Mic Visualizer + Daily Bugle */}
+      <div className="absolute top-6 right-6 z-20 flex items-center gap-3">
+        {/* Mic/Voice Action Indicator */}
+        <div className="relative flex items-center justify-center">
+          {((!isAudioLocked && isSpeaking) || isPlayingVoice) && (
+            <>
+              <span className="absolute inline-flex h-8 w-8 rounded-full bg-cyan-400 opacity-75 animate-ping" />
+              <span className="absolute inline-flex h-8 w-8 rounded-full border-2 border-cyan-400 opacity-50 animate-pulse" />
+            </>
+          )}
+          <div className={`p-2 rounded-full border transition-all duration-300 bg-slate-950/80 backdrop-blur-md flex items-center justify-center w-8 h-8 ${
+            ((!isAudioLocked && isSpeaking) || isPlayingVoice)
+              ? 'border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+              : 'border-slate-800 text-slate-500'
+          }`}>
+            <Mic className="w-3.5 h-3.5" />
+          </div>
+        </div>
+
         <button
           onClick={() => triggerBriefingNow()}
           className="px-4 py-2 rounded-full border text-xs font-mono font-bold uppercase tracking-wider bg-slate-950/80 border-amber-800/50 text-amber-400/80 hover:border-amber-500 hover:text-amber-300 transition-all duration-300 shadow-lg backdrop-blur-md flex items-center gap-2 cursor-pointer"
@@ -385,34 +402,53 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Main Avatar Area */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full z-10 -translate-y-8">
+      {/* Dashboard Center Layout */}
+      <div className="flex-1 w-full max-w-7xl z-10 flex flex-col lg:flex-row items-center justify-center gap-6 md:gap-10 -translate-y-4 px-4 overflow-y-auto lg:overflow-visible">
+        {/* Left Grid Card Column (Climate + Team Status) */}
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-4 w-full lg:w-72 items-center justify-center shrink-0">
+          <ClimateWidget />
+          <TeamStatusBoard />
+        </div>
 
+        {/* Center: Clock + Spidey Avatar */}
+        <div className="flex flex-col items-center justify-center gap-4 shrink-0">
+          <InteractiveClock />
 
-        <motion.div
-          onClick={handleAvatarClick}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full max-w-lg aspect-square max-h-[60vh] flex items-center justify-center pointer-events-auto cursor-pointer relative"
-        >
-          {loadingVoice && (
-            <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] rounded-full z-30 flex items-center justify-center pointer-events-none">
-              <div className="w-12 h-12 rounded-full border-2 border-red-500 border-t-transparent animate-spin" />
-            </div>
-          )}
-          <EchoPopAvatar
-            currentState={currentState}
-            currentMood={activeMood}
-            currentCategory={currentCategory}
-            activeViseme={activeViseme}
-            isPlayingVoice={isPlayingVoice}
-            lightsOn={sensorCtx.lightsOn}
-            tempC={sensorCtx.tempC}
-            isMatchLive={matchDay.isMatchLive}
-            audioData={isAudioLocked ? undefined : { bass, mid, treble }}
-            spideySenseActive={spideySense}
+          <motion.div
+            onClick={handleAvatarClick}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full max-w-[240px] sm:max-w-[280px] lg:max-w-[320px] aspect-square flex items-center justify-center pointer-events-auto cursor-pointer relative"
+          >
+            {loadingVoice && (
+              <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px] rounded-full z-30 flex items-center justify-center pointer-events-none">
+                <div className="w-12 h-12 rounded-full border-2 border-red-500 border-t-transparent animate-spin" />
+              </div>
+            )}
+            <EchoPopAvatar
+              currentState={currentState}
+              currentMood={activeMood}
+              currentCategory={currentCategory}
+              activeViseme={activeViseme}
+              isPlayingVoice={isPlayingVoice}
+              lightsOn={sensorCtx.lightsOn}
+              tempC={sensorCtx.tempC}
+              isMatchLive={matchDay.isMatchLive}
+              audioData={isAudioLocked ? undefined : { bass, mid, treble }}
+              spideySenseActive={spideySense}
+            />
+          </motion.div>
+        </div>
+
+        {/* Right Grid Card Column (Milestone Deadlines) */}
+        <div className="flex flex-col gap-4 w-full lg:w-72 items-center justify-center shrink-0">
+          <CountdownWidget
+            onUrgentStatusChange={(isUrgent, name) => {
+              setIsUrgentDeadline(isUrgent);
+              setUrgentDeadlineName(name);
+            }}
           />
-        </motion.div>
+        </div>
       </div>
 
       {/* Left-Side Floating Panels: GitHub Hub + TodoList */}
@@ -497,7 +533,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Right-Side Floating Panels: Countdown + Climate only */}
+      {/* Right-Side Floating Panels: Climate Graph only */}
       <div className="absolute bottom-6 right-6 z-30 hidden md:flex flex-col items-end gap-3">
         <AnimatePresence>
           {showClimate && (
@@ -515,12 +551,6 @@ export default function HomePage() {
             </motion.div>
           )}
         </AnimatePresence>
-        <CountdownWidget
-          onUrgentStatusChange={(isUrgent, name) => {
-            setIsUrgentDeadline(isUrgent);
-            setUrgentDeadlineName(name);
-          }}
-        />
       </div>
 
       {/* Control Hub Button + Cricket Scores below */}
