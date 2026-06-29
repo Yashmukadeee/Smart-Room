@@ -35,10 +35,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/hub');
+  const isProtectedRoute =
+    request.nextUrl.pathname === '/' ||
+    request.nextUrl.pathname.startsWith('/dashboard') ||
+    request.nextUrl.pathname.startsWith('/hub');
   const isLoginRoute = request.nextUrl.pathname.startsWith('/login');
 
-  if (isDashboardRoute && !user) {
+  if (isProtectedRoute && !user) {
     // Redirect unauthenticated user to the login page
     const url = request.nextUrl.clone();
     url.pathname = '/login';
@@ -46,9 +49,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isLoginRoute && user) {
-    // Redirect authenticated user away from login to dashboard
+    // Redirect authenticated user away from login to the home page
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 

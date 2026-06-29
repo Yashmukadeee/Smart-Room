@@ -17,12 +17,11 @@ import { MatchTicker } from '@/components/MatchTicker';
 import { GitHubHub } from '@/components/GitHubHub';
 import { LiveCricketScoreboard } from '@/components/LiveCricketScoreboard';
 import { InteractiveClock } from '@/components/InteractiveClock';
+import { ClimateWidget } from '@/components/ClimateWidget';
 import { useMatchDay } from '@/hooks/useMatchDay';
 import { useDailyBugle } from '@/hooks/useDailyBugle';
 import { useTodoSync } from '@/hooks/useTodoSync';
 import { TodoList } from '@/components/TodoList';
-import { ClimateWidget } from '@/components/ClimateWidget';
-import { TeamStatusBoard } from '@/components/TeamStatusBoard';
 
 const MOOD_GLOWS: Record<string, string> = {
   // Core moods
@@ -480,9 +479,6 @@ export default function HomePage() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* 4-Member Hackathon War Room Status Board */}
-        <TeamStatusBoard />
 
         {/* Toggle Buttons */}
         <div className="flex gap-3 flex-wrap">

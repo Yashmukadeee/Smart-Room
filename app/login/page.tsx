@@ -24,7 +24,7 @@ export default function LoginPage() {
       if (session) {
         setSuccessMessage('Authenticated successfully! Redirecting...');
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push('/');
           router.refresh();
         }, 800);
       }
@@ -83,9 +83,9 @@ export default function LoginPage() {
           setErrorMessage(data.error || 'PIN authentication failed');
           setPin('');
         } else if (data.success) {
-          setSuccessMessage('PIN Verified! Redirecting to dashboard...');
+          setSuccessMessage('PIN Verified! Redirecting to home...');
           setTimeout(() => {
-            router.push('/dashboard');
+            router.push('/');
             router.refresh();
           }, 800);
         }
