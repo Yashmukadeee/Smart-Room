@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering — this route reads request.url so it cannot be statically pre-rendered
+export const dynamic = 'force-dynamic';
+
 // Server-side proxy for GitHub API calls
 // This prevents the GitHub token from being exposed in the client-side bundle
 // The token is stored as GITHUB_TOKEN (not NEXT_PUBLIC_) so Next.js keeps it server-only
